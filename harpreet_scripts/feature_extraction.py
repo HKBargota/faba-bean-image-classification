@@ -6,16 +6,15 @@
 #SegmentAnthing (MetaAI): https://github.com/facebookresearch/segment-anything 
 # Reference paper: @article{kirillov2023segany, title={Segment Anything}, author={Kirillov, Alexander and Mintun, Eric and Ravi, Nikhila and Mao, Hanzi and Rolland, Chloe and Gustafson, Laura and Xiao, Tete and Whitehead, Spencer and Berg, Alexander C. and Lo, Wan-Yen and Doll{\'a}r, Piotr and Girshick, Ross},journal={arXiv:2304.02643},year={2023}}
 
+# Supervision library for image annotation: Reference: https://supervision.roboflow.com/annotators/#polygonannotator
+
 #Feature extraction: 
 #scikit-image library for image processing: Stéfan van der Walt, Johannes L. Schönberger, Juan Nunez-Iglesias, François Boulogne, Joshua D. Warner, Neil Yager, Emmanuelle Gouillart, Tony Yu and the scikit-image contributors. scikit-image: Image processing in Python. PeerJ 2:e453 (2014) https://doi.org/10.7717/peerj.453
 #https://scikit-image.org/docs/stable/api/skimage.measure.html
 
 
 
-
-
-
-###Image classification pipeline using amg SAM, inverted mask, label, feature extraction and classification
+###Image classification pipeline using amg SAM, feature extraction and classification (to be done)
 
     
     ## for loop for pipeline
@@ -96,13 +95,15 @@ def process_images(input_folder, output_folder):
 		df_total = []
 		
 		for idx, file in enumerate(files):
+
 #Step1:        # Read an image
 			image_path=os.path.join(root,file)
 			image_path = os.path.join(root,file)
 			image=cv2.imread(image_path)
 			image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)   
-			#image = crop(image, ((2000, 800), (50, 50), (0,0)), copy=False)   
+			#Crop the image part having colorcard 
 			image = crop(image, ((2200, 800), (50, 50), (0,0)), copy=False)
+
 #Step2: 	#Apply SegmentAnything model 
  
 			sam = sam_model_registry[model_type](checkpoint=sam_checkpoint) 
@@ -134,16 +135,23 @@ def process_images(input_folder, output_folder):
 			df_metadata=df2.T.apply(pd.to_numeric).set_index('id')
 			
  #Step3:           
-            # Filtering the masks of beans and eliminating the masks of labels and coin
+    # Filtering the masks of beans:
+
+			#eliminating the masks for label
 			df_metadata = df_metadata.drop(df_metadata[(df_metadata['bbox_x0'] <= 1600) & (df_metadata['bbox_y0'] >= 2400)].index) 
-			df_metadata = df_metadata.drop(df_metadata[(df_metadata['bbox_x0'] >= 3300) & (df_metadata['bbox_y0'] >= 2000)].index)
-			df_metadata = df_metadata.drop(df_metadata[(df_metadata['bbox_h'] >= 600)].index) #800
-			df_metadata = df_metadata.drop(df_metadata[(df_metadata['bbox_w'] >= 600)].index) #1000
-			df_metadata=df_metadata.loc[(df_metadata['area'] >= 5000) & (df_metadata['area'] <= 290000)]
-			print (df_metadata)
 			
-             
-	
+			#eliminating the masks for coin
+			df_metadata = df_metadata.drop(df_metadata[(df_metadata['bbox_x0'] >= 3300) & (df_metadata['bbox_y0'] >= 2000)].index)
+			
+			#eliminating the duplicate masks for beans in the same box -- 'bbox_h' and 'bbox_w' for height and width of the box
+			df_metadata = df_metadata.drop(df_metadata[(df_metadata['bbox_h'] >= 600)].index) 
+			df_metadata = df_metadata.drop(df_metadata[(df_metadata['bbox_w'] >= 600)].index) 
+			
+			#Considering the minimum and maximum area of beans
+			df_metadata=df_metadata.loc[(df_metadata['area'] >= 5000) & (df_metadata['area'] <= 300000)]
+			print (df_metadata)
+			             
+	    # Saving the metadata for the masks of beans to the output folder
 			image_filename = os.path.basename(image_path)
 			output_filename = f"Metadata_{image_filename}.xlsx"
 			output_path= os.path.join(output_folder, output_filename)
@@ -154,7 +162,6 @@ def process_images(input_folder, output_folder):
 			masks_SAM=[masks_SAM[x] for x in Masks_list]
 		
             
-
 				
 			# Save fava bean masks in output_folder
 			for i, mask_data in enumerate(masks_SAM):
@@ -167,6 +174,8 @@ def process_images(input_folder, output_folder):
 			print("After filtering of the masks, now the length of all masks required for feature extraction is: ", len(masks_SAM))
 			
 #Step4:            ##### IMAGE ANNOTATION --  Supervision detections
+			
+			# Reference: https://supervision.roboflow.com/annotators/#polygonannotator
 			detections = sv.Detections.from_sam(sam_result=masks_SAM)
 			polygon_annotator = sv.PolygonAnnotator(color=sv.ColorPalette.ROBOFLOW, thickness=36, color_lookup=sv.ColorLookup.INDEX)
 			annotated_frame = polygon_annotator.annotate(scene=image.copy(),	detections=detections)
@@ -193,13 +202,14 @@ def process_images(input_folder, output_folder):
 				
 				#For calculating the other parameters, mathematical operations have been used as advised in paper(Multiclass classification of dry beans using computer vision and machine learning techniques)
 				df_FE["Aspect_Ratio"] = df_FE["axis_major_length"]/df_FE['axis_minor_length']
-				#df_FE["Roundness"]=df_FE[(4*3.14*(df_FE["area"]))/((df_FE["perimeter"])*(df_FE["perimeter"]))]
+				df_FE["Roundness"]= (4*3.14*(df_FE["area"]))/((df_FE["perimeter"])**2)
 				df_FE["Compactness"] = df_FE["equivalent_diameter_area"]/df_FE["axis_major_length"]
+				
 				#Shape features
 				df_FE["Shapefactor1"] = df_FE["axis_major_length"]/df_FE["area"]
 				df_FE["Shapefactor2"] = df_FE["axis_minor_length"]/df_FE["area"]
-				#df_FE["Shapefactor3"] = df_FE["MinorAxisLength"]/df_FE["Area"]
-				#df_FE["Shapefactor4"] = df_FE["axis_minor_length"]/df_FE["area"]
+				df_FE["Shapefactor3"] = (df_FE["area"])/(((df_FE["axis_major_length"])/2)*((df_FE["axis_major_length"])/2)*3.14)
+				df_FE["Shapefactor4"] = (df_FE["area"])/(((df_FE["axis_major_length"])/2)*((df_FE["axis_minor_length"])/2)*3.14)
 
 				# The name of class has been extracted from the image file name 
 				class_in_image=(image_path).split('.JPG')[0]
@@ -209,7 +219,12 @@ def process_images(input_folder, output_folder):
 			df_total.append(df_FE2)
 		df_image=pd.concat(df_total)
 		print(df_image)
+
+#Save the final file of feature extraction from all images into output folder
 		output_filename = f"Fava_bean_Features_extraction.xlsx"
+		output_path= os.path.join(output_folder, output_filename)
+		df_image.to_excel(output_path)
+		output_filename = f"Fava_bean_Features_extraction.csv"
 		output_path= os.path.join(output_folder, output_filename)
 		df_image.to_csv(output_path)
 		print ("Feature extraction from fava bean images is completed..!")
