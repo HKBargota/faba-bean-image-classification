@@ -17,7 +17,8 @@ Currently, 254 images of fava beans (Vicia faba) provided by Dr. Nicholas Larkan
 
 **Installation:**
 This work is being done at Lethbridge Superdome and AWS Phenomics sandbox.
-Lethbridge superdome
+
+### Lethbridge superdome
 (Section 1) For using SegmentAnything, GPUs with cuda are highly recommended. For using Lethbridge superdome, follow the instructions as:
 1.	Connect to the AAFC network - either directly or by GCSRA/VPN
 2.	Open the VS Code (Visual Studio Code) pre-installed in your localApps folder (no IT support required)
@@ -85,7 +86,8 @@ python3 feature_extraction.py image/S3-input output_image
 (Note: image/S3-input is the input folder containing all the images to be processed, and output_image is the name of the output folder having the resultant files of .csv features extracted, masks, annotated images and metadata files for each image)
 For comparison studies of SAM, OpenCV and Sci-kit, copy and paste the code (from compare1.py) in the  Type 'nano <Human Readable>.py'. Change the path and name of the image in the code (e.g. image=cv2.read(‘path_to_image’)).
 Step 10: After running the python files, download the output files.
-AWS Phenomics Sandbox
+
+### AWS Phenomics Sandbox
 (Section 2): Currently, for using AWS Phenomics sandbox, CIS Amazon Linux 2 Benchmark - Level 1 EC2 instance and m5.xlarge (4 CPU, 16GB Ram 0.214$/Hour with 50 GB storage is being used in AWS CLOUD Phenomics sandbox for comparison of SAM (point, box, amg) methods.
 
 SUMMARY for feature extraction using SegmentAnything (SAM) and Sci-kit image toolboxes in AWS CLOUD Phenomics sandbox:
