@@ -264,6 +264,7 @@ def process_SAMmasks(SAM_masks, output_folder):
                                         label_image = measure.label(mask_coin)
                                         props = regionprops_table(label_image,properties=('area','perimeter','axis_major_length', 'axis_minor_length')) 
                                         coin_std = pd.DataFrame(props)
+                                        coin_std=coin_std[coin_std['area'] > 5000]
             #print (coin_std)
             
                                         Length_coin_mm=23.88
