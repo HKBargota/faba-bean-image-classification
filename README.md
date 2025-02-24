@@ -27,7 +27,7 @@ The novelty of this work lies in the utilization of SegmentAnything 2.1 for imag
 ## Final Output Files
 After running the faba bean feature extraction pipeline, there will be 2 output directories-
 1.	**Output dir SAM** will contain subfolders (Faba-Seed-CC_Vf_N-N_N) with masks (N.png) and metadata file (metadata.csv) for each image. 
-2.	**Output dir FE **will contain :
+2.	**Output dir FE** will contain :
 a.	The .csv file of dimensional and shape features (Fava_bean_Features_extraction.csv)
 b.	The .csv file of dimensional, shape, RGB values and Color names (FE_Color.csv)
 c.	Seed Count (.xlsx) (Seed Count.xlsx)
@@ -41,8 +41,11 @@ The features that have been extracted through this pipeline are:
 
 ## Prerequisites
 •	**Programming Knowledge**: Familiarity with Python and Linux
+
 •	**Libraries**: PyTorch, OpenCV, Sci-kit image, Numpy, Pandas, Matplotlib, Colormath, and SAM2’s official repository.
+
 •	**Hardware**: A GPU with CUDA support is recommended, (but not necessary) for efficient model inference.
+
 •	**Dataset**: Faba bean images captured using SOP 
 
 
@@ -70,14 +73,17 @@ a. Navigate to the directory containing environment.yml
    cd /path/to/environment.yml
    ```
 b. Run the following command to ensure that defaults is explicitly set in your Conda configuration.
+
      ```bash
    conda config --add channels defaults
    ```
 c. Create the Conda Environment
+
   ```bash
    conda env create -f environment.yml
    ```
 d. Activate the environment:
+
    ```bash
    conda activate fababean_env
    ```
@@ -85,6 +91,7 @@ d. Activate the environment:
 3. Clone SAM 2 Github Repository, checkpoints and Step1_SAM2.1.py 
 
 a.	Clone SAM 2 github repository and download the checkpoints by running the commands as:
+
   ```bash
    git clone https://github.com/facebookresearch/sam2.git && cd sam2
    pip install -e .
@@ -141,9 +148,9 @@ Run the CLI as:
 ```bash
    python sam2/Step1_SAM2.1.py input_dir faba_images output_dir output_SAM
 
-    python Step2_SAM2.1.py output_SAM output_FE
+   python Step2_SAM2.1.py output_SAM output_FE
 
-    python Step3_color.py faba_images output_FE
+   python Step3_color.py faba_images output_FE
 
    ```
 
