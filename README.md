@@ -1,7 +1,7 @@
 # Faba bean feature extraction pipeline from WGRF-faba bean images
 
 ## Overview
-This work provides a workflow for running faba bean feature extraction pipeline to extract the dimensional, shape and color of faba bean seeds in the .csv file from the faba bean images. It presents a methodology for seed image segmentation and feature extraction using advanced deep learning and image processing techniques. The [Segment Anything Model 2.1](https://github.com/facebookresearch/sam2/blob/main/README.md) (SAM2.1) has been used for precise segmentation, while OpenCV, Scikit-Image, and Matplotlib-colors are employed to analyze the dimensional, spatial, shape, and color properties of segmented seeds. The pipeline also gives the seed count in an image and annotated binary images. The pipeline has been specifically developed based on the spatial coordinates of faba bean seeds, colorcard, label, ruler and coin.
+This work provides a workflow for running faba bean feature extraction pipeline to extract the dimensional, shape and color of faba bean seeds in the .csv file from the faba bean images. It presents a methodology for seed image segmentation and feature extraction using advanced deep learning and image processing techniques. The [Segment Anything Model 2.1](https://github.com/facebookresearch/sam2/blob/main/README.md) (SAM2.1) has been used for precise segmentation, while [OpenCV](https://docs.opencv.org/4.x/d7/dbd/group__imgproc.html), [Scikit-Image](https://scikit-image.org/), and [Matplotlib-colors](https://matplotlib.org/stable/gallery/color/named_colors.html) are employed to analyze the dimensional, spatial, shape, and color properties of segmented seeds. The pipeline also gives the seed count in an image and annotated binary images. The pipeline has been specifically developed based on the spatial coordinates of faba bean seeds, colorcard, label, ruler and coin.
 
 ## Faba bean Images
 The images of faba beans were captured according to the Standard Operating Protocol (Figure 1).
@@ -13,7 +13,7 @@ Figure 1. Example of Faba bean images Vf1-1-2 (image shape=6000, 4000, 3) with f
 
 ## Segmentanything 2.1 (MetaAI) Model used for image segmentation
 
-Segment Anything Model 2 (SAM 2.1) is an advanced segmentation model designed to work seamlessly with both images and videos, treating a single image as a one-frame video. This work introduces a new task, model, and dataset aimed at improving segmentation performance. SAM 2 trained on SA-V dataset provides strong performance across a wide range of tasks. In image segmentation, SAM2 model is reported to be more accurate and 6 times faster than the Segment Anything Model (SAM). 
+[Segment Anything Model 2](https://ai.meta.com/sam2/) (SAM 2.1) is an advanced segmentation model designed to work seamlessly with both images and videos, treating a single image as a one-frame video. This work introduces a new task, model, and dataset aimed at improving segmentation performance. SAM 2 trained on SA-V dataset provides strong performance across a wide range of tasks. In image segmentation, SAM2 model is reported to be more accurate and 6 times faster than the Segment Anything Model (SAM). 
 
 ## Uniqueness/Novelty
 
@@ -67,7 +67,7 @@ project-folder/
 │-- Step1_SAM2.1.py    # Script for generating masks and metadata file using SAM2.1 model on images       
 │-- Step2_SAM2.1.py    # Script for extracting dimensional and shape features of beans and seed count
 │-- Step3_color.py     # Script for extracting color name and RGB value from images
-│-- harpreet_scripts      # Scripts for data analysis and images
+│-- harpreet_scripts   # Scripts for data analysis and images
 ```
 
 ## Installation
@@ -171,7 +171,7 @@ The project requires the following dependencies:
 
 - Segmentanything 2.1 
 - Python (>=3.8)
-- OpenCV (`opencv-python`)
+- OpenCV (opencv-python)
 - Scikit-learn
 - NumPy
 - Pandas
