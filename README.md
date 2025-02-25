@@ -131,6 +131,7 @@ Python script Step1_SAM2.1.py takes the images as input and generates the binary
    python sam2/Step1_SAM2.1.py input_dir <nameofinputdir> output_dir <nameofoutputdir>
    ```
 5. Step2: Extraction of dimensional and shape features (.csv file) and seed count (.xlsx file) from binary masks and metdata file from the output of Step1: 
+
 The python script (Step2_SAM2.1.py) uses the binary masks and metadata (from output of Step1) as input and generates the .csv file of dimensional & shape features and binary annotated combined masks (.png) as output in another output folder. Run the following command for generating the output files:
 
    ```bash
@@ -140,6 +141,7 @@ The python script (Step2_SAM2.1.py) uses the binary masks and metadata (from out
 Note: <nameofoutputdir> is the directory with binary masks and metadata file while <nameofnewoutputdir> should be the name of new output directory which will contain the .csv file of dimensional & shape features, seed count and annotated binary images
 
 6. Step3: Color extraction from images and features extraction files
+
 The python script (Step3_color.py), takes the .csv file of dimensional and shape features and images as inputs to generate output as feature extraction containing the dimensional, shape features, RGB values and color in the .csv file. 
 
    ```bash
@@ -148,11 +150,12 @@ The python script (Step3_color.py), takes the .csv file of dimensional and shape
 
 
 ###🎯 CLI : Example for running steps (Step1,2 and 3) of pipeline:
+
 •	faba_images: Input directory of images
 •	output_SAM: Output dir with masks and metadata file
 •	output_FE: Output dir with dimensional & shape features, color RGB values, Color label, seed count (.csv, .xlsx)
 
-Run the CLI as:
+(4.,5.,6.) Run the CLI as:
 
    ```bash
    python sam2/Step1_SAM2.1.py input_dir faba_images output_dir output_SAM
