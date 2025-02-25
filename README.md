@@ -3,7 +3,7 @@
 ## Overview
 This work provides a workflow for running faba bean feature extraction pipeline to extract the dimensional, shape and color of faba bean seeds in the .csv file from the faba bean images. It presents a methodology for seed image segmentation and feature extraction using advanced deep learning and image processing techniques. The [Segment Anything Model 2.1](https://github.com/facebookresearch/sam2/blob/main/README.md) (SAM2.1) has been used for precise segmentation, while [OpenCV](https://docs.opencv.org/4.x/d7/dbd/group__imgproc.html), [Scikit-Image](https://scikit-image.org/), and [Matplotlib-colors](https://matplotlib.org/stable/gallery/color/named_colors.html) are employed to analyze the dimensional, spatial, shape, and color properties of segmented seeds. The pipeline also gives the seed count in an image and annotated binary images. The pipeline has been specifically developed based on the spatial coordinates of faba bean seeds, colorcard, label, ruler and coin.
 
-## Faba bean Images
+### Faba bean Images
 The images of faba beans were captured according to the Standard Operating Protocol (Figure 1).
 
 <img src="https://gccode.ssc-spc.gc.ca/lethbridge-carsu/wgrf-cloud-phenomics/faba-bean-image-classification/-/raw/main/harpreet_scripts/Images/Faba-Seed-CC_Vf1-1-2.JPG" alt="Figure 1" width="200">
@@ -11,11 +11,11 @@ The images of faba beans were captured according to the Standard Operating Proto
 Figure 1. Example of Faba bean images Vf1-1-2 (image shape=6000, 4000, 3) with faba bean seeds, colorcard, coin, label and ruler     
 
 
-## Segmentanything 2.1 (MetaAI) Model used for image segmentation
+### Segmentanything 2.1 (MetaAI) Model used for image segmentation
 
 [Segment Anything Model 2](https://ai.meta.com/sam2/) (SAM 2.1) is an advanced segmentation model designed to work seamlessly with both images and videos, treating a single image as a one-frame video. This work introduces a new task, model, and dataset aimed at improving segmentation performance. SAM 2 trained on SA-V dataset provides strong performance across a wide range of tasks. In image segmentation, SAM2 model is reported to be more accurate and 6 times faster than the Segment Anything Model (SAM). 
 
-## Uniqueness/Novelty
+## 💡 Uniqueness/Novelty
 
 The novelty of this work lies in the utilization of SegmentAnything 2.1 for image segmentation. While researchers have traditionally relied on OpenCV and scikit-image libraries for segmentation tasks, this study leverages SegmentAnything 2.1 to produce 
 
@@ -24,7 +24,7 @@ The novelty of this work lies in the utilization of SegmentAnything 2.1 for imag
 <img src="https://gccode.ssc-spc.gc.ca/lethbridge-carsu/wgrf-cloud-phenomics/faba-bean-image-classification/-/raw/main/harpreet_scripts/Images/SAM2.1_Flowchart.png" alt="Figure 2" width="800">
 
 
-## Details of Steps (Figure 2):
+## 📝 Details of Steps (Figure 2):
 
 1. **Step1:** Image/Images are used as input and SAM2.1 model generates the binary masks (.png) and metadata file (.csv) for each image in the Output dir SAM
 
@@ -32,7 +32,7 @@ The novelty of this work lies in the utilization of SegmentAnything 2.1 for imag
 
 3. **Step3:** Both the output dir FE (from Step2) and the images (used as input in Step1) will be used as input for this step and the color labels and RGB values will be extracted using colormath library to give .csv file in the same Final output dir FE (from Step2).
 
-## Final Output Files
+## 📚 Final Output Files
 
 After running the faba bean feature extraction pipeline, there will be 2 output directories-
 1.	**Output dir SAM** will contain subfolders (Faba-Seed-CC_Vf_N-N_N) with masks (N.png) and metadata file (metadata.csv) for each image. 
@@ -48,7 +48,7 @@ The features that have been extracted through this pipeline are:
 3.	**Color (2)**: RGB value, color_seeds
 4.	**Seed count**: Number of seeds in image
 
-## Prerequisites
+### Prerequisites
 •	**Programming Knowledge**: Familiarity with Python and Linux
 
 •	**Libraries**: PyTorch, OpenCV, Sci-kit image, Numpy, Pandas, Matplotlib, Colormath, and SAM2’s official repository.
@@ -58,7 +58,7 @@ The features that have been extracted through this pipeline are:
 •	**Dataset**: Faba bean images captured using SOP 
 
 
-## Project Structure
+### Project Structure
 
 ```
 project-folder/
@@ -147,7 +147,7 @@ The python script (Step3_color.py), takes the .csv file of dimensional and shape
    ```
 
 
-### CLI : Example for running steps (Step1,2 and 3) of pipeline:
+###🎯 CLI : Example for running steps (Step1,2 and 3) of pipeline:
 •	faba_images: Input directory of images
 •	output_SAM: Output dir with masks and metadata file
 •	output_FE: Output dir with dimensional & shape features, color RGB values, Color label, seed count (.csv, .xlsx)
