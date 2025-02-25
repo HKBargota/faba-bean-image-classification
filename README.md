@@ -364,20 +364,30 @@ Rio and Mark Wiebe and Pearu Peterson and Pierre, Gerard-Marchant and Kevin Shep
 • Git
 
 @software{git,
+
    author = {Linus Torvalds and others},
+
    title = {Git},
+
    version = {2.33.1},
+
    date = {2023-03-08},
+
    url = {https://git-scm.com/},
+
 }
 
 
 • Pytorch
 
 @article{paszke2017automatic,
+
    title={Automatic differentiation in PyTorch},
+
    author={Paszke, Adam and Gross, Sam and Chintala, Soumith and Chanan, Gregory and Yang, Edward and DeVito, Zachary and Lin, Zeming and Desmaison, Alban and Antiga, Luca and Lerer, Adam},
+
    year={2017}
+
 }
 
 
