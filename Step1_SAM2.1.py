@@ -1,6 +1,7 @@
-#hkb
-
+#__authors__= "Mathew Richards" and "harpreet kaur bargota"
+#__email__= "mathew.richards@agr.gc.ca" and "harpreet.bargota@agr.gc.ca"
 #__Project__="Faba bean Feature extraction pipeline (Step1)"
+
 #References include:
 #https://github.com/facebookresearch/sam2
 #https://ai.meta.com/research/publications/sam-2-segment-anything-in-images-and-videos/
