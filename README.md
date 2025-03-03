@@ -198,15 +198,17 @@ These dependencies are included in `environment.yml`.
 Cite:
 • Segmentanything 2.1
 
-@article{kirillov2023segany,
+@article{ravi2024sam2,
    
-   title={Segment Anything},
+   title={SAM 2: Segment Anything in Images and Videos},
    
-   author={Kirillov, Alexander and Mintun, Eric and Ravi, Nikhila and Mao, Hanzi and Rolland, Chloe and Gustafson, Laura and Xiao, Tete and Whitehead, Spencer and Berg, Alexander C. and Lo, Wan-Yen and Dollar, Piotr and Girshick, Ross},
+   author={Ravi, Nikhila and Gabeur, Valentin and Hu, Yuan-Ting and Hu, Ronghang and Ryali, Chaitanya and Ma, Tengyu and      Khedr, Haitham and Radle, Roman and Rolland, Chloe and Gustafson, Laura and Mintun, Eric and Pan, Junting and Alwala, Kalyan Vasudev and Carion, Nicolas and Wu, Chao-Yuan and Girshick, Ross and Dollar, Piotr and Feichtenhofer, Christoph},
    
-   journal={arXiv:2304.02643},
+   journal={arXiv preprint arXiv:2408.00714},
    
-   year={2023}
+   url={https://arxiv.org/abs/2408.00714},
+   
+   year={2024}
 
 }
 
