@@ -1,7 +1,8 @@
-#hkb
-#__author__="harpreet kaur bargota"
-#__email__="harpreet.bargota@agr.gc.ca"
+#hkb & HNTW
+#__author__="harpreet kaur bargota" & "Hao Nan Tobey Wang"
+#__email__="harpreet.bargota@agr.gc.ca" & "haonantobey.wang@agr.gc.ca"
 #__Project__="Faba bean Feature extraction pipeline (Step2)"
+#__Date__=2025/11/10
 
 #References: 
 #SAM 2: Segment Anything in Images and Videos:https://github.com/facebookresearch/sam2
@@ -10,7 +11,6 @@
 #Feature extraction: 
 #scikit-image library for image processing: Stéfan van der Walt, Johannes L. Schönberger, Juan Nunez-Iglesias, François Boulogne, Joshua D. Warner, Neil Yager, Emmanuelle Gouillart, Tony Yu and the scikit-image contributors. scikit-image: Image processing in Python. PeerJ 2:e453 (2014) https://doi.org/10.7717/peerj.453
 #https://scikit-image.org/docs/stable/api/skimage.measure.html
-
 
 
 
@@ -30,6 +30,7 @@ warnings.filterwarnings(action='ignore')
 from skimage import measure
 from skimage.measure import label, regionprops, regionprops_table
 from collections import Counter
+from circle_fit import taubinSVD
 
 
 #Function to define the shape of beans based on the values of shapefactor1,2,3,4 from faba bean images
@@ -265,55 +266,103 @@ def process_SAMmasks(SAM_masks, output_folder):
 #Standardize 
        
                                 for mask_filename in Mask_index:
-# Construct the full file path
+                                        # Construct the full file path
                                         file_path = os.path.join(subfolder_path, f'{Mask_index[0]}.png')
-        
-# Load each binary mask as grayscale
+
+                                        # Load each binary mask as grayscale
                                         mask_coin = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
-                                        label_image = measure.label(mask_coin)
-                                        props = regionprops_table(label_image,properties=('area','perimeter','axis_major_length', 'axis_minor_length')) 
-                                        coin_std = pd.DataFrame(props)
-                                        coin_std=coin_std[coin_std['area'] > 5000]
-            #print (coin_std)
-            
-                                        Length_coin_mm=23.88
-                                        width_coin_mm=23.88
 
-                                        Area_standard_coin_pixels= coin_std.iloc[0]['area'] # Area of coin in pixels
-                                        Area_Standard_coin_mm2=3.14*(Length_coin_mm/2)*(Length_coin_mm/2) # Area of coin in mm2
-                                        Calibration_factor_area=(Area_Standard_coin_mm2/Area_standard_coin_pixels) # Calibration factor for area
+                                        # --- Taubin SVD fit ---
+                                        # Fit full coin using contour + taubinSVD (minimal change)
+                                        contours, _ = cv2.findContours(mask_coin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+                                        cnt = max(contours, key=cv2.contourArea)  # keep same behavior but get the main contour
+                                        pts = np.vstack(cnt).squeeze()
 
+                                        # taubinSVD fit -> xc, yc (center), radius_pixels, sigma (residual)
+                                        xc, yc, radius_pixels, sigma = taubinSVD(pts)
 
-                                        axis_major_length_pixels= coin_std.iloc[0]['axis_major_length'] # Length of coin in pixels
-                                        Calibration_factor_length=(Length_coin_mm/axis_major_length_pixels) # Calibration factor for length
+                                        # Keep original variable names, but assign from fitted circle
+                                        Length_coin_mm = 23.88
+                                        width_coin_mm = 23.88
 
-                                        axis_minor_length_pixels= coin_std.iloc[0]['axis_minor_length'] # Width of coin in pixels
-                                        Calibration_factor_width=(width_coin_mm/axis_minor_length_pixels) # Calibration factor for width
+                                        Area_standard_coin_pixels = np.pi * (radius_pixels ** 2)                      # fitted full-coin area (pixels)
+                                        Area_Standard_coin_mm2 = np.pi * (Length_coin_mm / 2) ** 2                  # true coin area (mm^2)
+                                        Calibration_factor_area = (Area_Standard_coin_mm2 / Area_standard_coin_pixels)
 
-                                        perimeter_mm =(2*3.14*Length_coin_mm)/2
-                                        perimeter_pixels= coin_std.iloc[0]['perimeter'] # perimeter of coin in pixels
-                                        Calibration_factor_perimeter=(perimeter_mm/perimeter_pixels) # Calibration factor for perimeter
+                                        axis_major_length_pixels = 2 * radius_pixels                                # full diameter in pixels
+                                        Calibration_factor_length = (Length_coin_mm / axis_major_length_pixels)
 
-                                        df_FE["Area_mm2_SAM"]=df_FE["area"] * Calibration_factor_area
-                                        df_FE["Length_mm_SAM"]=df_FE["axis_major_length"] * Calibration_factor_length
-                                        df_FE["Width_mm_SAM"]=df_FE["axis_minor_length"] * Calibration_factor_width
-                                        df_FE["perimeter_mm_SAM"]=df_FE["perimeter"] * Calibration_factor_perimeter
+                                        axis_minor_length_pixels = 2 * radius_pixels                                # assume circular coin
+                                        Calibration_factor_width = (width_coin_mm / axis_minor_length_pixels)
+
+                                        perimeter_mm = 2 * np.pi * (Length_coin_mm / 2)
+                                        perimeter_pixels = 2 * np.pi * radius_pixels
+                                        Calibration_factor_perimeter = (perimeter_mm / perimeter_pixels)
+
+                                        # Apply calibration to bean features
+                                        # Taubin calibration
+                                        df_FE["Area_mm2_SAM_taubin"] = df_FE["area"] * Calibration_factor_area
+                                        df_FE["Length_mm_SAM_taubin"] = df_FE["axis_major_length"] * Calibration_factor_length
+                                        df_FE["Width_mm_SAM_taubin"] = df_FE["axis_minor_length"] * Calibration_factor_width
+                                        df_FE["Perimeter_mm_SAM_taubin"] = df_FE["perimeter"] * Calibration_factor_perimeter
+
+                                        # --- Min Enclosing Circle fit ---
+                                        contours, _ = cv2.findContours(mask_coin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+                                        cnt = max(contours, key=cv2.contourArea)
+                                        (x_center, y_center), radius = cv2.minEnclosingCircle(cnt)
+                                        Area_standard_coin_pixels_min = np.pi * (radius ** 2)
+                                        Calibration_factor_area_min = Area_Standard_coin_mm2 / Area_standard_coin_pixels_min
+                                        axis_major_length_pixels_min = 2 * radius
+                                        Calibration_factor_length_min = Length_coin_mm / axis_major_length_pixels_min
+                                        axis_minor_length_pixels_min = 2 * radius
+                                        Calibration_factor_width_min = width_coin_mm / axis_minor_length_pixels_min
+                                        perimeter_pixels_min = 2 * np.pi * radius
+                                        Calibration_factor_perimeter_min = perimeter_mm / perimeter_pixels_min
+                                        # Minimal enclosing circle calibration (minEnc)
+                                        df_FE["Area_mm2_SAM_minEnc"] = df_FE["area"] * Calibration_factor_area_min
+                                        df_FE["Length_mm_SAM_minEnc"] = df_FE["axis_major_length"] * Calibration_factor_length_min
+                                        df_FE["Width_mm_SAM_minEnc"] = df_FE["axis_minor_length"] * Calibration_factor_width_min
+                                        df_FE["Perimeter_mm_SAM_minEnc"] = df_FE["perimeter"] * Calibration_factor_perimeter_min
+
                                         print (df_FE)
                                 df_list.append(df_FE)
                         df_FE2 = pd.concat(df_list)
                         df_total.append(df_FE2)
                 df_image=pd.concat(df_total)
                 df_image['Shape']=df_image.apply(classify_shape, axis=1)
-                df_image = df_image.loc[:, ['class','Area_mm2_SAM', 'Length_mm_SAM', 'Width_mm_SAM', 'perimeter_mm_SAM',  'centroid-0', 'centroid-1',
-                                              'bbox-0', 'bbox-1', 'bbox-2', 'bbox-3', 'area', 'eccentricity', 'equivalent_diameter_area', 
-                                              'perimeter', 'solidity', 'area_convex', 'extent', 'axis_major_length', 'axis_minor_length', 
-                                              'Aspect_Ratio','Roundness', 'Compactness', 'Circularity-SAM','Shape','Shapefactor1', 'Shapefactor2','Shapefactor3', 
-                                              'Shapefactor4']]
-                df_image.rename(columns={'class': 'Class', 'Area_mm2_SAM':'Area-SAM(mm2)','Length_mm_SAM':'Length-SAM(mm)', 'Width_mm_SAM':'Width-SAM(mm)', 
-                                         'perimeter_mm_SAM': 'Perimeter-SAM(mm)', 'area':'Area-SAM(pix)','eccentricity':'Eccentricity', 
-                                         'equivalent_diameter_area':'Equivalent diameter area', 'perimeter':'Perimeter (pix)','solidity':'Solidity',
-                                         'area_convex':'Area convex','extent':'Extent','axis_major_length':'Axis Major Length-SAM(pix)',  
-                                        'axis_minor_length':'Axis Minor Length-SAM(pix)','Aspect_Ratio':'Aspect Ratio'},inplace=True)
+                df_image = df_image.loc[:, [
+                    'class',
+                    'Area_mm2_SAM_taubin','Length_mm_SAM_taubin','Width_mm_SAM_taubin','Perimeter_mm_SAM_taubin',
+                    'Area_mm2_SAM_minEnc','Length_mm_SAM_minEnc','Width_mm_SAM_minEnc','Perimeter_mm_SAM_minEnc',
+                    'centroid-0','centroid-1',
+                    'bbox-0','bbox-1','bbox-2','bbox-3',
+                    'area','eccentricity','equivalent_diameter_area','perimeter',
+                    'solidity','area_convex','extent','axis_major_length','axis_minor_length',
+                    'Aspect_Ratio','Roundness','Compactness','Circularity-SAM',
+                    'Shape','Shapefactor1','Shapefactor2','Shapefactor3','Shapefactor4'
+                ]]
+
+                df_image.rename(columns={
+                    'class': 'Class',
+                    'Area_mm2_SAM_taubin':'Area-SAM_taubin(mm2)',
+                    'Length_mm_SAM_taubin':'Length-SAM_taubin(mm)',
+                    'Width_mm_SAM_taubin':'Width-SAM_taubin(mm)',
+                    'Perimeter_mm_SAM_taubin':'Perimeter-SAM_taubin(mm)',
+                    'Area_mm2_SAM_minEnc':'Area-SAM_minEnc(mm2)',
+                    'Length_mm_SAM_minEnc':'Length-SAM_minEnc(mm)',
+                    'Width_mm_SAM_minEnc':'Width-SAM_minEnc(mm)',
+                    'Perimeter_mm_SAM_minEnc':'Perimeter-SAM_minEnc(mm)',
+                    'area':'Area-SAM(pix)',
+                    'eccentricity':'Eccentricity',
+                    'equivalent_diameter_area':'Equivalent diameter area',
+                    'perimeter':'Perimeter(pix)',
+                    'solidity':'Solidity',
+                    'area_convex':'Area convex',
+                    'extent':'Extent',
+                    'axis_major_length':'Axis Major Length-SAM(pix)',
+                    'axis_minor_length':'Axis Minor Length-SAM(pix)',
+                    'Aspect_Ratio':'Aspect Ratio'
+                }, inplace=True)
                                                                     
                 df_image.index.names = ['Seed No. per image']
                 print (df_image)
@@ -322,17 +371,17 @@ def process_SAMmasks(SAM_masks, output_folder):
                 
         
 #Save the final file of feature extraction from all images into output folder
-                output_filename = f"Fava_bean_Features_extraction.csv"
+                output_filename = f"Faba_bean_Features_extraction.csv"
                 output_path= os.path.join(output_folder, output_filename)
                 df_image.to_csv(output_path)
-                print ("Dimensional and Shape feature extraction from fava bean images is completed.")
+                print ("Dimensional and Shape feature extraction from faba bean images is completed.")
 
 #Save the Seed Count data from all images into output folder
              
                 output_filename = f"Seed Count.xlsx"
                 output_path= os.path.join(output_folder, output_filename)
                 count.to_excel(output_path)
-                print ("Seed count from fava bean images is completed.")
+                print ("Seed count from faba bean images is completed.")
       
 if __name__ == "__main__":
     # Create ArgumentParser object
