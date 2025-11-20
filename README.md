@@ -58,8 +58,10 @@ The features that have been extracted through this pipeline are:
 
 ## Acknowledgements
 
-We sincerely thank our mentors and collaborators at Agriculture and Agri-food Canada (AAFC) for their guidance, support, and invaluable insights throughout this project: Rodrigo Ortega Polo (Project Lead/Biology Study Leader-Bioinformatics), Nathaniel Lim (Acting Project Manager), Nicholas Larkan (Research Scientist), Etienne Low-Decarie (Manager, BICOE), Jackson Eyres (Team Lead), Mathew Richards (Bioinformatics Programmer), Xiaohui Yang (Project Co-Lead), Harpreet Kaur Bargota (Bioinformatics Programmer Analyst/Biologist), Hao Nan Tobey Wang (Research Biologist), and Trista Cormier (Research Assistant).
+We sincerely thank our mentors and collaborators at Agriculture and Agri-food Canada (AAFC) for their guidance, support, and invaluable insights throughout this project: Rodrigo Ortega Polo (Project Lead/Biology Study Leader-Bioinformatics), Nathaniel Lim (Acting Project Manager), Nicholas Larkan (Research Scientist), Etienne Low-Decarie (Manager, BICOE), Jackson Eyres (Team Lead-BICOE), Mathew Richards (Bioinformatics Programmer), Xiaohui Yang (Project Co-Lead), Harpreet Kaur Bargota (Bioinformatics Programmer Analyst/Biologist), Hao Nan Tobey Wang (Research Biologist), and Trista Cormier (Research Assistant).
+
 We also gratefully acknowledge the Western Grains Research Foundation (WGRF), Canada, for funding and supporting this work.
+
 
 
 
